@@ -67,7 +67,8 @@ class BaseFilter(ApiBase):
                 output.append(rec_dict)
             page_n +=1
         return output
-    
+"""
+
     @backoff.on_exception(backoff.expo, (Fault, Exception), max_tries=5, factor=3)
     def get_page(self, **kwargs):
         try:
@@ -83,7 +84,6 @@ class BaseFilter(ApiBase):
         
         for page in records:
             yield page
-"""
 
 class Customers(BaseFilter):
     def __init__(self, ns_client):
