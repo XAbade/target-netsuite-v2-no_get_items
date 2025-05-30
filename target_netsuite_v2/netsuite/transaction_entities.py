@@ -16,36 +16,6 @@ class BaseFilter(ApiBase):
     @backoff.on_exception(backoff.expo, (Fault, Exception, AccountDocumentPermissionError), max_tries=5, factor=3)
     def get_all(self, selected_fileds=[], **kwargs):
         output = []
-        selected_fileds = selected_fileds + ["externalId", "internalId"]
-        
-        # Fetch only the first page
-        page = next(self.get_page(**kwargs), None)
-        if page is None:
-            return output
-
-        logger.info(f"Getting {self.type_name}: page 1")
-        for record in page:
-            record = record.__dict__["__values__"]
-            rec_dict = {}
-            for k, v in record.items():
-                if k in selected_fileds:
-                    if getattr(v, "__dict__", None):
-                        values = v.__dict__["__values__"]
-                        if "recordRef" in values:
-                            values = values["recordRef"]
-                            rec_dict[k] = [dict(value.__dict__["__values__"]) for value in values]
-                        else:
-                            rec_dict[k] = dict(values)
-                    else:
-                        rec_dict[k] = v
-            output.append(rec_dict)
-
-        return output
-"""
-class BaseFilter(ApiBase):
-    @backoff.on_exception(backoff.expo, (Fault, Exception, AccountDocumentPermissionError), max_tries=5, factor=3)
-    def get_all(self, selected_fileds=[], **kwargs):
-        output = []
         page_n = 1
         selected_fileds = selected_fileds + ["externalId", "internalId"]
         for page in self.get_page(**kwargs):
@@ -67,8 +37,7 @@ class BaseFilter(ApiBase):
                 output.append(rec_dict)
             page_n +=1
         return output
-"""
-
+    
     @backoff.on_exception(backoff.expo, (Fault, Exception), max_tries=5, factor=3)
     def get_page(self, **kwargs):
         try:
@@ -85,9 +54,11 @@ class BaseFilter(ApiBase):
         for page in records:
             yield page
 
+
 class Customers(BaseFilter):
     def __init__(self, ns_client):
         ApiBase.__init__(self, ns_client=ns_client, type_name='customer')
+    """
         self.require_lastModified_date = True
 
     def get_all_generator(self, page_size=1000, last_modified_date=None):
@@ -100,10 +71,12 @@ class Customers(BaseFilter):
 
     def post(self, data) -> OrderedDict:
         return None
+    """
 
 class Currencies(Currencies):
     def __init__(self, ns_client):
         ApiBase.__init__(self, ns_client=ns_client, type_name='Currency')
+    """
 
     def get_all(self):
         try:
@@ -112,6 +85,7 @@ class Currencies(Currencies):
         except NetSuiteRequestError as e:
             logger.warning(f"It was not possible to retrieve {self.type_name} data: {e.message}")
             return []
+    """
 
 class Locations(BaseFilter):
     def __init__(self, ns_client):
@@ -135,12 +109,13 @@ class Departments(BaseFilter):
 class Accounts(BaseFilter):
     def __init__(self, ns_client):
         ApiBase.__init__(self, ns_client=ns_client, type_name='Account')
-
+    """
         ns_client._search_preferences = ns_client.SearchPreferences(
                 bodyFieldsOnly=False,
                 pageSize=1000,
                 returnSearchColumns=True
             )
+    """
 
 class Classifications(BaseFilter):
     def __init__(self, ns_client):
@@ -150,6 +125,7 @@ class Classifications(BaseFilter):
 class Items(BaseFilter):
     def __init__(self, ns_client):
         ApiBase.__init__(self, ns_client=ns_client, type_name='Item')
+    """
         self.require_lastModified_date = True
 
     def get_all_generator(self, page_size=1000, last_modified_date=None):
@@ -159,11 +135,12 @@ class Items(BaseFilter):
         ps = PaginatedSearch(client=self.ns_client, type_name='Item', pageSize=page_size,
                              search_record=search_record)
         return self._paginated_search_generator(ps)
-
+    """
 
 class PurchaseOrder(BaseFilter):
     def __init__(self, ns_client):
         ApiBase.__init__(self, ns_client=ns_client, type_name='PurchaseOrder')
+    """
         self.require_paging = True
         self.require_lastModified_date = True
 
@@ -183,10 +160,12 @@ class PurchaseOrder(BaseFilter):
 
     def post(self, data) -> OrderedDict:
         return None
+    """
 
 class Invoices(BaseFilter):
     def __init__(self, ns_client):
         ApiBase.__init__(self, ns_client=ns_client, type_name='Invoice')
+    """
         self.require_paging = True
         self.require_lastModified_date = True
 
@@ -220,10 +199,12 @@ class Invoices(BaseFilter):
 
     def post(self, data) -> OrderedDict:
         return None
+    """
 
 class JournalEntries(ApiBase):
     def __init__(self, ns_client):
         ApiBase.__init__(self, ns_client=ns_client, type_name='journalEntry')
+    """
         self.require_lastModified_date = True
 
     def get_all(self, last_modified_date=None):
@@ -309,10 +290,12 @@ class JournalEntries(ApiBase):
             f"Posting JournalEntries now with {len(je['lineList']['line'])} entries. ExternalId {je['externalId']} tranDate {je['tranDate']}")
         res = self.ns_client.upsert(je)
         return self._serialize(res)
+    """
 
 class InboundShipment(ApiBase):
     def __init__(self, ns_client):
         ApiBase.__init__(self, ns_client=ns_client, type_name='InboundShipment')
+    """
         self.require_lastModified_date = True
 
     def get_all(self, last_modified_date=None, **kwargs):
@@ -337,3 +320,4 @@ class InboundShipment(ApiBase):
 
         res = self.ns_client.update(record=inbound_shipment)
         return self._serialize(res)
+    """
