@@ -13,6 +13,8 @@ import singer
 logger = singer.get_logger()
 
 class BaseFilter(ApiBase):
+    logger.info(f"Skiping BaseFilter requests")
+    """
     @backoff.on_exception(backoff.expo, (Fault, Exception, AccountDocumentPermissionError), max_tries=5, factor=3)
     def get_all(self, selected_fileds=[], **kwargs):
         output = []
@@ -53,6 +55,7 @@ class BaseFilter(ApiBase):
         
         for page in records:
             yield page
+    """
 
 
 class Customers(BaseFilter):
