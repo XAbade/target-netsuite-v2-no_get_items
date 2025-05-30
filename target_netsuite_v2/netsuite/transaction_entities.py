@@ -131,7 +131,7 @@ class Items(BaseFilter):
                              search_record=search_record)
         return self._paginated_search_generator(ps)
 
-
+"""
 class PurchaseOrder(BaseFilter):
     def __init__(self, ns_client):
         ApiBase.__init__(self, ns_client=ns_client, type_name='PurchaseOrder')
@@ -154,7 +154,7 @@ class PurchaseOrder(BaseFilter):
 
     def post(self, data) -> OrderedDict:
         return None
-
+"""
 
 class Invoices(BaseFilter):
     def __init__(self, ns_client):
