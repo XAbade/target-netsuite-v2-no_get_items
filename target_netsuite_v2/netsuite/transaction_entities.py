@@ -16,6 +16,36 @@ class BaseFilter(ApiBase):
     @backoff.on_exception(backoff.expo, (Fault, Exception, AccountDocumentPermissionError), max_tries=5, factor=3)
     def get_all(self, selected_fileds=[], **kwargs):
         output = []
+        selected_fileds = selected_fileds + ["externalId", "internalId"]
+        
+        # Fetch only the first page
+        page = next(self.get_page(**kwargs), None)
+        if page is None:
+            return output
+
+        logger.info(f"Getting {self.type_name}: page 1")
+        for record in page:
+            record = record.__dict__["__values__"]
+            rec_dict = {}
+            for k, v in record.items():
+                if k in selected_fileds:
+                    if getattr(v, "__dict__", None):
+                        values = v.__dict__["__values__"]
+                        if "recordRef" in values:
+                            values = values["recordRef"]
+                            rec_dict[k] = [dict(value.__dict__["__values__"]) for value in values]
+                        else:
+                            rec_dict[k] = dict(values)
+                    else:
+                        rec_dict[k] = v
+            output.append(rec_dict)
+
+        return output
+"""
+class BaseFilter(ApiBase):
+    @backoff.on_exception(backoff.expo, (Fault, Exception, AccountDocumentPermissionError), max_tries=5, factor=3)
+    def get_all(self, selected_fileds=[], **kwargs):
+        output = []
         page_n = 1
         selected_fileds = selected_fileds + ["externalId", "internalId"]
         for page in self.get_page(**kwargs):
@@ -35,7 +65,7 @@ class BaseFilter(ApiBase):
                         else:
                             rec_dict[k] = v
                 output.append(rec_dict)
-            #page_n +=1
+            page_n +=1
         return output
     
     @backoff.on_exception(backoff.expo, (Fault, Exception), max_tries=5, factor=3)
@@ -53,7 +83,7 @@ class BaseFilter(ApiBase):
         
         for page in records:
             yield page
-
+"""
 
 class Customers(BaseFilter):
     def __init__(self, ns_client):
