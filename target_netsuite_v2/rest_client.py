@@ -1581,7 +1581,12 @@ class netsuiteRestV2Sink(BatchSink):
 
                 items.append(order_item)
 
-            if items:
-                purchase_order["item"] = {"items": items}
+            return payload
+        else:
+            return None
 
-            return purchase_order
+
+        if items:
+            purchase_order["item"] = {"items": items}
+
+        return purchase_order
