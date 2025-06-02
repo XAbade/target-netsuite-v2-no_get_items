@@ -1484,8 +1484,9 @@ class netsuiteRestV2Sink(BatchSink):
             purchase_order["externalId"] = record["invoiceNumber"]
         elif record.get("externalId"):
             purchase_order["externalId"] = record["externalId"].get("value")
-
-        purchase_order["memo"] = record.get("description")
+            
+        if record.get("description"):
+            purchase_order["memo"] = record.get("description")
 
         if record.get("customFormId"):
             purchase_order["customForm"] = {"id": record["customFormId"]}
