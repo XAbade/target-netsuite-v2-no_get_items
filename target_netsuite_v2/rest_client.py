@@ -1544,42 +1544,44 @@ class netsuiteRestV2Sink(BatchSink):
         purchase_order["tranid"] = record.get("order_number")
 
         items = []
-        for line in record.get("line_items", []):
-            order_item = {}
+        if "line_items" in record:
+            record["line_items"] = json.loads(record["line_items"])
+            for line in record("line_items"):
+                order_item = {}
+                if record.get("order_number"):
+                    order_item["orderDoc"] = {"id": record["order_number"]}
 
-            if record.get("order_number"):
-                order_item["orderDoc"] = {"id": record["order_number"]}
+                if record.get("description"):
+                    order_item["description"] = line.get("description")
 
-            if record.get("description"):
-                order_item["description"] = line.get("description")
-
-            # Get the product Id
-            if line.get("product_id"):
-                order_item["item"] = {"id": line.get("product_id")}
-            elif context["reference_data"].get("Items") and line.get("product_name"):
-                product_names = [
-                    c["itemId"] for c in context["reference_data"]["Items"]
-                ]
-                product_name = self.get_close_matches(
-                    line["product_name"], product_names, n=2, cutoff=0.95
-                )
-                if product_name:
-                    product_name = max(product_name, key=product_name.get)
-                    product_data = [
-                        c
-                        for c in context["reference_data"]["Items"]
-                        if c["itemId"] == product_name
+                # Get the product Id
+                if line.get("product_id"):
+                    order_item["item"] = {"id": line.get("product_id")}
+                elif context["reference_data"].get("Items") and line.get("product_name"):
+                    product_names = [
+                        c["itemId"] for c in context["reference_data"]["Items"]
                     ]
-                    if product_data:
-                        product_data = product_data[0]
-                        order_item["item"] = {"id": product_data.get("internalId")}
-            order_item["quantity"] = line.get("quantity")
-            order_item["amount"] = round(
-                line.get("quantity") * line.get("unit_price"), 3
-            )
+                    product_name = self.get_close_matches(
+                        line["product_name"], product_names, n=2, cutoff=0.95
+                    )
+                    if product_name:
+                        product_name = max(product_name, key=product_name.get)
+                        product_data = [
+                            c
+                            for c in context["reference_data"]["Items"]
+                            if c["itemId"] == product_name
+                        ]
+                        if product_data:
+                            product_data = product_data[0]
+                            order_item["item"] = {"id": product_data.get("internalId")}
+                order_item["quantity"] = line.get("quantity")
+                order_item["amount"] = round(
+                    line.get("quantity") * line.get("unit_price"), 3
+                )
 
-            items.append(order_item)
-        if items:
-            purchase_order["item"] = {"items": items}
+                items.append(order_item)
 
-        return purchase_order
+            if items:
+                purchase_order["item"] = {"items": items}
+
+            return purchase_order
