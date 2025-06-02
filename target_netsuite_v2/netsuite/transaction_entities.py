@@ -21,10 +21,12 @@ class BaseFilter(ApiBase):
         for page in self.get_page(**kwargs):
             logger.info(f"Getting {self.type_name}: page {page_n}")
             for record in page:
+                logger.info(f"Here_1")
                 record = record.__dict__["__values__"]
                 rec_dict = {}
                 for k, v in record.items():
                     if k in selected_fileds:
+                        logger.info(f"Here_2")
                         if getattr(v, "__dict__", None):
                             values = v.__dict__["__values__"]
                             if "recordRef" in values:
@@ -41,9 +43,12 @@ class BaseFilter(ApiBase):
     @backoff.on_exception(backoff.expo, (Fault, Exception), max_tries=5, factor=3)
     def get_page(self, **kwargs):
         try:
+            logger.info(f"Here_3")
             records = self.get_all_generator(**kwargs)
         except NetSuiteRequestError as e:
+            logger.info(f"Here_4")
             if self.type_name == "Account":
+                logger.info(f"Here_5")
                 self.ns_client._search_preferences = None
                 logger.warning(f"It was not possible to retrieve {self.type_name} data: {e.message}")
                 logger.warning(f"Retrying without search preferences, Accounts subsidiaryList will be empty")
@@ -52,6 +57,7 @@ class BaseFilter(ApiBase):
             return []
         
         for page in records:
+            logger.info(f"Here_6")
             yield page
 
 
