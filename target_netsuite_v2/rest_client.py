@@ -1546,7 +1546,7 @@ class netsuiteRestV2Sink(BatchSink):
         items = []
         if "line_items" in record:
             record["line_items"] = json.loads(record["line_items"])
-            for line in record("line_items"):
+            for line in record["line_items"]:
                 order_item = {}
                 if record.get("order_number"):
                     order_item["orderDoc"] = {"id": record["order_number"]}
