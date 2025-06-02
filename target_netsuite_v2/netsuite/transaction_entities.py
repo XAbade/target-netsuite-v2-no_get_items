@@ -15,18 +15,18 @@ logger = singer.get_logger()
 class BaseFilter(ApiBase):
     @backoff.on_exception(backoff.expo, (Fault, Exception, AccountDocumentPermissionError), max_tries=5, factor=3)
     def get_all(self, selected_fileds=[], **kwargs):
+        logger.info(f"Skip get_all")
+        """
         output = []
         page_n = 1
         selected_fileds = selected_fileds + ["externalId", "internalId"]
         for page in self.get_page(**kwargs):
             logger.info(f"Getting {self.type_name}: page {page_n}")
             for record in page:
-                logger.info(f"Here_1")
                 record = record.__dict__["__values__"]
                 rec_dict = {}
                 for k, v in record.items():
                     if k in selected_fileds:
-                        logger.info(f"Here_2")
                         if getattr(v, "__dict__", None):
                             values = v.__dict__["__values__"]
                             if "recordRef" in values:
@@ -39,6 +39,7 @@ class BaseFilter(ApiBase):
                 output.append(rec_dict)
             page_n +=1
         return output
+        """
     
     @backoff.on_exception(backoff.expo, (Fault, Exception), max_tries=5, factor=3)
     def get_page(self, **kwargs):
