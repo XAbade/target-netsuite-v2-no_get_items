@@ -1551,7 +1551,7 @@ class netsuiteRestV2Sink(BatchSink):
                 if record.get("order_number"):
                     order_item["orderDoc"] = {"id": record["order_number"]}
 
-                if record.get("description"):
+                if line.get("description"):
                     order_item["description"] = line.get("description")
 
                 # Get the product Id
